@@ -9,8 +9,17 @@
 %% you intend to use for the project
 
 \section{Solution}
-(preliminary plan, subject to change)
+U-Net is a convolutional neural network (CNN) architecture designed for image segmentation tasks. This architecture consists of an encoder and decoder. The encoder repeated applies convolutions and downsamples the image. It learns increasingly abstract features.  The decoder upsamples these features back up to the original resolution of the input. Its job is to figure out the exact location of features. In the context of our project, encoded early layers will detect edges and features, while deeper layers can learn patterns associated with tumors.
+\\
+
 
 Each MRI scan consists of four images: T1, contrast-enhanced T1 (T1CE), T2, and T2-FLAIR. These images will be stacked as separate input channels, allowing the model to use information from each image concurrently in its prediction. 
+\\
+
+The target labels will consist of the already labeled segmentation masks provided with the dataset. Therefore, as the labels are pixel level, the model will also perform pixel-wise classification, assigning each pixel in the U-Net slice to either the background or one of the annotated tumor regions.
+\\
 
 The model will be built based off a U-Net architecture, which is a tried and proven workflow designed specifically for biomedical image classification tasks. PyTorch will be used for implementation and training/validation.
+
+Sources:
+https://arxiv.org/abs/1505.04597
