@@ -12,3 +12,113 @@
 %% Expected size of the dataset (number of data points) and 3 example data points with labels.
 %% Your dataset should have at least 1k data points. Some projects will have more or less data.
 
+
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{hyperref}
+\title{data}
+
+\begin{document}
+
+
+\section{Data Source(s) and Plan for Data Collection}
+\subsection{yashika TODO}
+open data points example in itk snap and confirm slice indices
+\subsection{Primary Data Source}
+The primary data source is the \textbf{RSNA-ASNR-MICCAI Brain Tumor Segmentation (BraTS) 2021 Challenge dataset} (Task~1: segmentation). It is the standard multi-institutional, expert-annotated multimodal MRI benchmark for glioma segmentation. Each subject provides four co-registered MRI volumes (T1, T1CE, T2, T2-FLAIR) and an expert segmentation mask, which matches our design of stacking the four modalities as input channels to a 2D U-Net and predicting pixel-wise tumor sub-region labels.
+
+\subsection{Official Sources and Access}
+\begin{itemize}
+    \item \textbf{Primary challenge platform (Synapse / Sage Bionetworks)}:  
+    
+    \url{https://www.synapse.org/#!Synapse:syn51514105} (training data under syn51514105 or successor links). The project uses the BraTS adult glioma MRI dataset, originally associated with the BraTS 2020/2021 challenges. The original BraTS 2021 challenge is now closed and its dataset is no longer directly hosted through the original challenge page. According to the BraTS organizers, the BraTS-GLI dataset made available through the BraTS 2023 challenge contains the same BraTS 2020/2021 data, with the enhancing tumor (ET) label changed from 4 to 3.
+
+    \item \textbf{The Cancer Imaging Archive (TCIA) mirror / original contributing collections}:  
+    DOI \url{https://doi.org/10.7937/jc8x-9874} (RSNA-ASNR-MICCAI-BraTS-2021). This hosts the processed NIfTI volumes (and some DICOM) for approximately 1480 subjects of the challenge cohort under a CC-BY 4.0 license. Underlying raw DICOM from contributing collections (TCGA-GBM, TCGA-LGG, IvyGAP, CPTAC-GBM, UPENN-GBM, ACRIN-FMISO-Brain, UCSF-PDGM, etc.) are available via TCIA’s NBIA Data Retriever under the respective collection licenses (mostly open or controlled-access with DUA).
+
+    \item \textbf{Kaggle} (convenient for download, but secondary):  
+    example\ \url{https://www.kaggle.com/datasets/dschettler8845/brats-2021-task1} Related uploads such as awsaf49/brats2020-training-data for earlier years are available.  
+\end{itemize}
+
+\subsection{Terms of Service, Licensing and Accessing the Data}
+\begin{itemize}
+    \item \textbf{No web scraping is performed.} The data is a formally published research dataset obtained through official portals (Synapse client, TCIA download tools) or the Kaggle mirror. There is no live API polling, so rate limiting is not a concern. Large downloads use the authenticated bulk-download tools provided by these platforms.
+    \item \textbf{License:} released for research use with attribution (CC-BY 4.0 on TCIA). We will use the data for non-commercial academic purposes only and will not attempt to re-identify subjects. All data was de-identified by the organizers before release.
+    \item \textbf{Required acknowledgement:} we will include the acknowledgement statement requested by the organizers, referencing the RSNA-ASNR-MICCAI BraTS Challenge and Synapse ID syn25829067 and cite the papers listed in the Citations subsection.
+\end{itemize}
+
+\subsection{How the Data Were Collected, Annotated and Pre-processed}
+
+    \paragraph{Acquisition:}Retrospective multi-institutional routine clinical pre-operative multiparametric MRI (mpMRI) of adult gliomas (WHO grades II--IV, predominantly glioblastoma / high-grade and lower-grade gliomas). Scanners and protocols vary across approximately 15 institutions (United States, Europe, India, etc.), producing realistic heterogeneity in field strength (1.5T / 3T), sequence parameters and image quality.
+
+    \paragraph{Modalities:} native T1, post-contrast T1-weighted (T1Gd / T1CE), T2-weighted and T2-FLAIR. Each subject contributes four co-registered 3-D volumes.
+
+    \paragraph{Annotation protocol:}
+    
+    Labels were produced by manual delineation by 1 - 4 trained raters following a standardized BraTS protocol, then reviewed and approved by experienced neuroradiologists. \textbf{We do not label any data ourselves}, so no per-instance annotation time applies. (Manual voxel-level delineation of a single 3D glioma volume is a labor-intensive expert task, which is precisely why using a pre-annotated benchmark is appropriate.) The mask labels are:
+
+    \begin{center}
+    \begin{tabular}{|l|c|r|}
+    \hline
+    \textbf{Label} & \textbf{Region} & \textbf{Abbrev.} \\
+      \hline
+    0 & Background / non-tumor & --- \\
+    \hline
+    1 & Necrotic and non-enhancing tumor core & NCR/NET \\
+    \hline
+    2 & Peritumoral edema / invaded tissue & ED \\
+    \hline
+    4 & GD-enhancing tumor & ET \\
+    \hline
+    \end{tabular}
+\end{center}
+Standard evaluation regions are Whole Tumor $= \{1,2,4\}$, Tumor Core $= \{1,4\}$, and Enhancing Tumor $= \{4\}$. Label 3 does not exist in BraTS masks. Before computing the loss we will remap $4 \rightarrow 3$, giving a 4-class problem with labels $\{0,1,2,3\}$.
+
+\paragraph{Preprocessing applied by the organizers:} DICOM to NIfTI conversion (with PHI removed), rigid co-registration of the four modalities, registration to the SRI24 anatomical template, resampling to 1\,mm$^3$ isotropic resolution, and skull-stripping. Volumes are $240\times240\times155$ voxels stored as \texttt{.nii.gz}.
+
+\paragraph{Preprocessing performed by us:} Intensities have no universal scale in MRI, so we will apply per-volume, per-modality z-score normalization computed over non-zero (brain) voxels only, optionally with percentile clipping. We will then stack the four modalities as channels, extract axial 2D slices, remap the labels as above, and apply training-time augmentation (flips, small rotations, elastic deformation, intensity shifts) applied identically across channels and mask.
+    
+
+\subsection{Available Metadata}
+Each case is identified by a subject ID (\texttt{BraTS2021\_XXXXX}). The release also provides, for subsets of cases, a mapping to original TCIA/TCGA identifiers and MGMT promoter methylation status (used in the radiogenomic Task~2). Metadata is not used as a model input in this project the model input is the four imaging modalities only.
+
+\subsection{Dataset Size and Use of the Data}
+\begin{itemize}
+    \item \textbf{3D volumes:} 1251 publicly labeled training subjects. Each contributes four modality volumes and one mask. A further 219 validation cases are released with hidden labels and cannot be used for local evaluation, so all train/validation/test splits are drawn from the 1251 labeled subjects.
+    \item \textbf{2D slices:} each subject has 155 axial slices, giving roughly 194,000 slices in total. After discarding empty (all-zero) slices and subsampling slices without tumor, we expect on the order of tens of thousands of multi-channel training slices. The exact count will be computed after download. This far exceeds the 1000-data-point minimum.
+    \item \textbf{Entire dataset vs subset:} we plan to use the \emph{entire} labeled cohort. Tumor pixels are a small minority of each slice, so every tumor-containing slice is valuable and inter-subject variability in tumor appearance and scanner characteristics supports generalization. If memory or compute limits arise during prototyping, a random subject-level subset (30--50\%) may be used temporarily, with final models trained on the full set.
+    \item \textbf{Splitting:} the train/validation/test split (approx.\ 70/15/15) is done \emph{by subject}, never by slice, to prevent leakage between adjacent slices of the same patient.
+\end{itemize}
+
+\paragraph{Why the entire labeled training cohort rather than a small subset.}
+The project goal is accurate segmentation under realistic appearance variation. Using the full 1251-subject set (and the derived 2-D slices) maximizes statistical power, captures the documented inter-subject heterogeneity of tumor morphology and intensity and permits rigorous evaluation of the 2-D U-Net against published BraTS benchmarks. Computational resources permitting, the complete set will be used. If memory constraints arise during early prototyping, a random but stratified 30 - 50\,\% subject subset can be employed temporarily, with final models re-trained on the full set.
+
+\subsection{Example Data Points}
+Each ``data point'' for the 2-D U-Net is a 4-channel $240 \times 240$ (or cropped/resized) axial slice together with its corresponding integer label map.
+
+\begin{enumerate}
+    \item \textbf{Subject BraTS2021\_00000, axial slice $\approx z = 78$}  
+    Input: stacked [T1, T1CE, T2, FLAIR] intensities (skull-stripped, co-registered).  
+    Label map: predominantly background (0) with a central necrotic core (1), surrounding enhancing rim (4) and peripheral edema (2). Typical whole-tumor Dice target region occupies $\sim$ 5 - 15\,\% of the slice.
+
+    \item \textbf{Subject BraTS2021\_00123, axial slice $\approx z = 95$}  
+    Input: same four modalities.  
+    Label map: larger infiltrative edema (2) with smaller non-enhancing core (1) and sparse enhancing foci (4). Demonstrates the visual similarity of tumor tissue to surrounding healthy white matter that makes the task challenging.
+
+    \item \textbf{Subject BraTS2021\_00456, axial slice $\approx z = 62$}  
+    Input: four modalities.  
+    Label map: almost pure enhancing tumor (4) with minimal necrosis, illustrating inter-subject morphological variability. Background class still dominates the pixel count, motivating Dice / focal / class-weighted losses.
+\end{enumerate}
+
+
+\subsection{Citations}
+The following works are cited for use of this dataset:
+\begin{enumerate}
+    \item U.\ Baid et al., ``The RSNA-ASNR-MICCAI BraTS 2021 Benchmark on Brain Tumor Segmentation and Radiogenomic Classification,'' arXiv:2107.02314, 2021.
+    \item B.\ H.\ Menze et al., ``The Multimodal Brain Tumor Image Segmentation Benchmark (BRATS),'' \textit{IEEE Trans.\ Med.\ Imaging}, 34(10):1993--2024, 2015.
+    \item S.\ Bakas et al., ``Advancing The Cancer Genome Atlas glioma MRI collections with expert segmentation labels and radiomic features,'' \textit{Scientific Data}, 4:170117, 2017.
+    \item Kaggle mirror: \url{https://www.kaggle.com/datasets/dschettler8845/brats-2021-task1}.
+\end{enumerate}
+
+
+\end{document}
