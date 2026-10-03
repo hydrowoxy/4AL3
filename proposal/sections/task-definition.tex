@@ -4,8 +4,56 @@
 
 \subsection{Machine Learning Task}
 
+The project is a supervised semantic segmentation task. Rather than assigning
+one class to an entire MRI slice, the model performs dense multiclass
+classification by assigning a class to each spatial location in the slice.
+The ground-truth labels are provided by the expert-annotated segmentation masks
+included with the BraTS 2021 dataset. Each location is assigned exactly one
+class, making this a single-label, four-class segmentation problem rather than
+a multi-label classification problem.
+
 \subsection{Model Input}
+
+Each model input consists of four corresponding axial MRI slices from the same
+subject and anatomical position. The slices are taken from the T1, T1CE, T2,
+and T2-FLAIR volumes, which have already been co-registered so that the same
+spatial location corresponds to the same anatomy in each sequence. The four
+$240 \times 240$ slices are stacked as separate input channels, producing a
+$240 \times 240 \times 4$ input to the 2D U-Net.
+
+Using all four sequences allows the model to use differences in tissue
+appearance across the MRI sequences when distinguishing tumor sub-regions.
+For example, T1CE provides information about contrast-enhancing tissue, while
+T2 and T2-FLAIR provide different contrast for tissue with increased water
+content, including regions associated with edema.
 
 \subsection{Model Output and Segmentation Classes}
 
+For each input slice, the model produces a $240 \times 240$ segmentation map
+with one predicted class for each spatial location. The original BraTS 2021
+segmentation masks use labels 0, 1, 2, and 4. Before training, label 4 will be
+remapped to 3 so that the model predicts four consecutive classes:
+
+\begin{itemize}
+    \item Class 0: background / non-tumor tissue
+    \item Class 1: necrotic and non-enhancing tumor core (NCR/NET)
+    \item Class 2: peritumoral edema / invaded tissue (ED)
+    \item Class 3: enhancing tumor (ET), corresponding to label 4 in the
+          original BraTS masks
+\end{itemize}
+
+The predicted 2D segmentation therefore corresponds directly to the labels
+from the matching axial slice of the original 3D BraTS segmentation mask.
+
 \subsection{Technical Challenges}
+
+The segmentation task is difficult because the four classes are highly
+imbalanced: background tissue occupies most of an MRI slice, while individual
+tumor sub-regions may contain relatively few pixels. Gliomas also vary
+substantially between subjects in their size, shape, location, and appearance,
+so the model must generalize across tumors with very different morphologies.
+Boundaries between tumor sub-regions may be irregular or visually ambiguous,
+requiring the model to distinguish tissue classes using information distributed
+across the four MRI sequences. Finally, because the proposed model operates on
+individual 2D slices, it does not directly use information from adjacent slices
+in the 3D MRI volume.
