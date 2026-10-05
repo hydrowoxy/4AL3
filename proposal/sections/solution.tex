@@ -14,6 +14,12 @@ U-Net is a convolutional neural network (CNN) architecture designed for image se
 
 Each MRI scan consists of four images: T1, contrast-enhanced T1 (T1CE), T2, and T2-FLAIR. These images will be stacked as separate input channels, allowing the model to use information from each image concurrently in its prediction. 
 
-The target labels will consist of the already labeled segmentation masks provided with the dataset. Therefore, as the labels are pixel level, the model will also perform pixel-wise classification, assigning each pixel in the U-Net slice to either the background or one of the annotated tumor regions.
+The target labels will consist of the already labeled segmentation masks provided with the dataset. Therefore, as the labels are pixel level, the model will also perform pixel-wise classification, assigning each pixel in the U-Net slice to either the background or one of the annotated tumor regions. As such, the model will be trained as a 2D multiclass U-Net on axial slices.
 
-The model will be built based off a U-Net architecture, which is a tried and proven workflow designed specifically for biomedical image classification tasks. PyTorch will be used for implementation and training/validation.
+Each MRI modality will be normalized separately since MRI intensities do not have a universal scale. 2D axial slices will be extracted, and T1/T1CE/T2/FLAIR will be stacked as four channels. Augmentation will then be applied during training. 
+
+The split will be done by patient/subject, not by individual slice. Otherwise adjacent slices from the same patient could appear in both training and testing which will artificially inflate results.
+
+Dice score will be used as the main segmentation metric. It will be evaluated for individual tumor regions. We will compare cross-entropy loss versus Dice-based loss or a combined Dice + cross-entropy loss.
+
+Relevant libraries are PyTorch, NumPy, NiBabel (for reading nii.gz data files).
