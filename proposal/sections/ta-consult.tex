@@ -2,5 +2,32 @@
 
 %% A paragraph describing what you talked to your TA about, what advice they gave you, and
 %% how this influenced your plans for the project.
+
 \section{TA Consultation}
 
+We consulted Yasmin Ahmadi regarding our proposed MRI segmentation
+project using the BraTS 2021 dataset. We discussed the available
+data, including the four MRI modalities (T1, T1CE, T2, and T2-FLAIR),
+and our plan to extract 2D axial slices from the 3D volumes for
+model training. We also discussed the target segmentation labels
+and our plan to use a U-Net architecture.
+
+Yasmin recommended establishing a simpler CNN-based segmentation
+model as a baseline against which to evaluate U-Net. She suggested comparing models
+of increasing complexity to determine whether a more advanced
+model provides a meaningful improvement in segmentation performance, rather
+than evaluating U-Net in isolation.
+She also suggested considering binary segmentation depending on
+the final definition of our target labels.
+
+Based on this feedback, we plan to retain the four-class
+segmentation task defined by the BraTS annotations while
+introducing a simpler CNN-based segmentation model as our
+baseline. We will then implement U-Net and evaluate both models using
+the same patient-level training, validation, and testing splits.
+We plan to use the Dice similarity coefficient to measure overlap
+between predicted and ground-truth tumor regions. This will
+allow us to directly compare U-Net against the simpler CNN
+baseline and determine whether the additional architectural
+complexity produces a meaningful improvement in segmentation
+performance.
