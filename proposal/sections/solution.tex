@@ -9,16 +9,12 @@
 %% you intend to use for the project
 
 \section{Solution}
+
+U-Net is a CNN based architecture designed for image segmentation tasks. This architecture consists of an encoder and decoder. Skip connections carry features from the encoder to the decoder to help recover spatial detail. \cite{unet}
+
 Following the TA's advice, we will compare a simpler CNN-based segmentation model with a 2D U-Net to investigate whether the more complex architecture improves tumor segmentation enough to justify its computational cost. It should be noted that both models are CNNs; however, the baseline will use a small number of convolutional and pooling layers followed by upsampling and a pixel-wise classification layer, but without encoder--decoder skip connections (as seen in U-Net.) This baseline is inspired by fully convolutional networks, which produce dense segmentation maps rather than a single label for an image \cite{fcn}.
 
-U-Net is a CNN based architecture designed for image segmentation tasks. This architecture consists of an encoder and decoder. The encoder repeatedly applies convolutions and downsamples the image. It learns increasingly abstract features. The decoder upsamples these features back up to the original resolution of the input. Its job is to figure out the exact location of features. Skip connections carry features from the encoder to the decoder to help recover spatial detail. In the context of our project, early encoder layers will detect edges and features, while deeper layers can learn patterns associated with tumors. \cite{unet}
-
-Each MRI scan consists of four images: T1, contrast-enhanced T1 (T1CE), T2, and T2-FLAIR. These images will be stacked as separate input channels, allowing the model to use information from each image concurrently in its prediction. 
-
-The target labels will consist of the already labeled segmentation masks provided with the dataset. Therefore, as the labels are pixel level, both models will perform pixel-wise classification, assigning each pixel in an axial slice to either the background or one of the annotated tumor regions. Both models will predict the same four classes: background, necrotic/non-enhancing tumor core, edema, and enhancing tumor.
-
-Each MRI modality will be normalized separately since MRI intensities do not have a universal scale. 2D axial slices will be extracted, and T1/T1CE/T2/FLAIR will be stacked as four channels. Augmentation will then be applied during training. 
-
+Both models will use the same four-channel axial slices and four-class segmentation masks described above.
 The split will be done by patient/subject, not by individual slice. Otherwise adjacent slices from the same patient could appear in both training and testing which will artificially inflate results. Both models will use the same approximately 70/15/15 train/validation/test split, preprocessing, augmentation, and comparable training and tuning budgets. Model settings will be selected using validation performance, with the test set reserved for the final evaluation.
 
 Dice score will be used as the main segmentation metric. This is because in the context of tumor segmentation, background pixels will vastly outnumber tumor pixels. Unlike conventional pixel wise accuracy, Dice measures the overlap between predicted and ground truth masks without rewarding correct background predictions. As outlined in the data section, it will be evaluated for whole tumor, tumor core, and enhancing tumor. 
