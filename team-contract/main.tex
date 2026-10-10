@@ -7,88 +7,128 @@
 \usepackage{setspace}
 \setstretch{1.5}
 
-\usepackage{enumitem}
 \usepackage{tabularx}
 \usepackage{array}
 
 \begin{document}
+%-----------------------------------------------------------
+% Cover page
+%-----------------------------------------------------------
+\begin{titlepage}
+  \centering
+  \vspace*{2cm}
+  {\Huge\bfseries Team Contract\par}
+  \vspace{1cm}
+  {\Large Group 30\par}
+  \vspace{1.5cm}
+  {\large
+    Salma Baig, 400447531, baigs19\par
+    Yashika Yashika, 400442476, yashikay\par
+    Lucas Zheng, 400556902, zhengq42\par
+  }
+  \vspace{1cm}
+  {\large TA: Yasmin\par}
+  \vspace{1cm}
+  {\large October 9, 2026\par}
+  \vfill
+  {\large COMPSCI/SFWRENG 4AL3: Applications of Machine Learning\par
+  Fall 2026\par}
+  \vspace*{2cm}
+\end{titlepage}
 
-uhh cover page like the other doc???
-
-\begin{center}
-    {\Large\bfseries Team Contract}\\[0.5em]
-    {\bfseries Group 30}\\[0.5em]
-    COMPSCI/SFWRENG 4AL3\\
-    Fall 2026
-\end{center}
-
+%-----------------------------------------------------------
 \section{Team Purpose}
 
-overall goal?
+Our project is to automatically segment brain tumors (adult gliomas) in MRI scans. We will build a 2D U-Net, a type of convolutional neural network, using the BraTS dataset. For each axial slice, the model takes four MRI sequences (T1, T1CE, T2, and T2-FLAIR) as input and labels every pixel as background or as one of the tumor regions.
+ 
+Our mission is to work together as a team to build, evaluate, and clearly report on a model that handles these challenges, while learning from each other and respecting each member's time and ideas.
 
+%-----------------------------------------------------------
 \section{Roles and Responsibilities}
-
-% What is expected of every team member?
-% How will work be distributed?
 
 \subsection{Shared Responsibilities}
 
-\begin{itemize}[leftmargin=*]
-    \item vontributions?
-    \item dealdines?
-    \item comms?
-    \item reviewing each others' work?
+\begin{itemize}
+  \item \textbf{Contributions:} Each member contributes a fair share of the technical and written work. Tasks are divided based on interest, skills, and availability and we plan to rebalance as the project evolves so that no one is overloaded.
+  \item \textbf{Deadlines:} We set internal deadlines at least 12 hours before each course deadline to leave time for review and fixes. Members complete tasks by the agreed date or tell the team as early as possible if they cannot. This is tracked by GitHub issues. 
+  \item \textbf{Communication:} Members respond to team messages within 24 hours and sooner as a deadline approaches. We will communicate in a timely manner  about illness, heavy workloads in other courses, or other obligations that might affect our availability.
+  \item \textbf{Reviewing each other's work:} Every piece of work is reviewed by at least one other member before it is considered final. Feedback shall be recorded by github comments on pull requests from feature branch to main. 
 \end{itemize}
 
 \subsection{Individual Roles}
+ Each member is expected to attend meetings, complete assigned tasks on time and communicate honestly about progress and problems and help teammates when they are stuck. Everyone supports each other and contributes across all areas.
 
-% "Roles may evolve as the project progresses"
 
-% table?
-
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Salma Baig:} fdsfsdf
-    \item \textbf{Yashika Yashika:} dfdsfds
-    \item \textbf{Lucas Zheng:} dfsdfsdfsd
+\begin{itemize}
+  \item \textbf{Salma Baig (domain knowledge, analysis, and reporting):}
+  \begin{itemize}
+    \item Explain the medical background to the team, including the BraTS tumor sub-regions and how they appear on each MRI sequence.
+    \item Check that the data and labels make sense (e.g review sample slices and masks, and confirm the label mapping).
+    \item Lead the visual inspection of predicted masks and the error analysis (missed tumors, inaccurate boundaries, differences between tumor sub-regions).
+    \item Interpret results in a clinical context.
+    \item Lead the writing of the background and discussion sections of the report.
+  \end{itemize}
+ 
+  \item \textbf{Yashika Yashika (modeling and training):}
+  \begin{itemize}
+    \item Implement the baseline fully convolutional model and the 2D U-Net in PyTorch.
+    \item Implement the loss functions (cross-entropy and Dice + cross-entropy).
+    \item Write and run the training loops and tune hyperparameters on the validation set, using the same training budget for both models.
+    \item Track experiments and save model checkpoints and training logs.
+    \item Lead the writing of the methods and training sections of the report.
+  \end{itemize}
+ 
+  \item \textbf{Lucas Zheng (data pipeline, evaluation, and infrastructure):}
+  \begin{itemize}
+    \item Download the dataset and build the preprocessing pipeline (z-score normalization, channel stacking, axial slice extraction, augmentation).
+    \item Create the subject-level train/validation/test split and the PyTorch data loaders.
+    \item Implement the evaluation code: 3D Dice for whole tumor, tumor core, and enhancing tumor, plus parameter counts and inference time.
+    \item Maintain the GitHub repository, branches, and project board, and keep the code reproducible (fixed seeds, documented dependencies).
+    \item Lead the writing of the data and results sections of the report.
+  \end{itemize}
 \end{itemize}
+ 
 
+
+%-----------------------------------------------------------
 \section{Team Management and Communication}
 
-
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Communication:} wertwet
-    \item \textbf{Meetings:} how often how to schedule etc
-    \item \textbf{Task Management:} assign and track thru github ig
-    \item \textbf{Code Review:} uhh yeah idk
-    \item \textbf{Decision Making:} um 
+\begin{itemize}
+  \item \textbf{Communication:} We use Discord for daily discussion and project-related matters. Moving forward, we will document each meeting and upload the notes to GitHub to track our progress. The responsibility for taking meeting notes will rotate among team members. For virtual meetings, we will use Microsoft Teams’ transcription feature to capture the discussion.
+  \item \textbf{Meetings:} We meet weekly, either in person or virtually depending on group availability.  We plan to have extra meetings before major deadlines. Meeting times and locations are determined by shared availability. As such, members arrive on time and notify the team in advance if they must miss a meeting and they are responsible for catching up on what they missed by referring to meeting notes.
+  \item \textbf{Task Management:} We assign and track tasks using GitHub Issues. Every task has an owner and a due date and owners update status as work progresses.
+  \item \textbf{Code Review:} We work on feature branches and merge through pull requests. Each pull request needs at least one approval from a teammate who did not write the code before it is merged to the main branch. Reviews should be completed within 2 days, weekends included. We keep code readable and commented where needed for ease of reviewing. 
+  
+  \item \textbf{Decision Making:} We aim for consensus after open discussion where everyone can share their opinion. If consensus cannot be reached, we vote and the majority decides. Major decisions such as changing the project scope or model design require additional feedback from TA and Professor. 
 \end{itemize}
 
+%-----------------------------------------------------------
 \section{Conflict Resolution}
 
-should conflict arise we will meet at dawn and fight to the death 
+We expect disagreements to happen and view them as opportunities for constructive discussion and collaboration. Our process is:
 
+\begin{enumerate}
+  \item \textbf{Talk directly first:} A member who has a concern raises it to the person involved, focusing on the specific issue and its effect on the overall project.
+  \item \textbf{Meet as a team:} If it is not resolved within a few days, we hold a team meeting dedicated to the issue. Each person gets to explain their perspective and we work toward a solution everyone can accept.
+  \item \textbf{Document the agreement:} We write down what was agreed in the meeting notes and check in at the next meeting.
+  
+  \item \textbf{Escalate if needed:} If we cannot resolve the issue ourselves or a problem persists such as repeated missed deadlines or lack of contribution,  we will bring it to our TA or Professor's attention for appropriate resolution.
+\end{enumerate}
+
+
+%-----------------------------------------------------------
 \section{Signatures}
 
-By signing below, we confirm that we agree to the expectations outlined in this
-contract.
+By signing below, we confirm that we agree to the expectations outlined in this contract.
 
-\vspace{1.5em}
+\vspace{1em}
 
-\renewcommand{\arraystretch}{2.2}
-
-\begin{tabularx}{\textwidth}{
-    |>{\raggedright\arraybackslash}X|
-     >{\raggedright\arraybackslash}X|
-     >{\centering\arraybackslash}p{2.5cm}|}
-    \hline
-    \textbf{Name} & \textbf{Signature} & \textbf{Date} \\
-    \hline
-    Salma Baig & & \\
-    \hline
-    Yashika Yashika & & \\
-    \hline
-    Lucas Zheng & & \\
-    \hline
-\end{tabularx}
+\renewcommand{\arraystretch}{2.6}
+\begin{tabular}{@{}p{5cm} p{6cm} p{3.5cm}@{}}
+  \textbf{Name} & \textbf{Signature} & \textbf{Date} \\
+  Salma Baig      & SB & \rule[-0.3em]{3cm}{0.4pt} \\
+  Yashika Yashika & \rule[-0.3em]{5.5cm}{0.4pt} & \rule[-0.3em]{3cm}{0.4pt} \\
+  Lucas Zheng     & \rule[-0.3em]{5.5cm}{0.4pt} & \rule[-0.3em]{3cm}{0.4pt} \\
+\end{tabular}
 
 \end{document}

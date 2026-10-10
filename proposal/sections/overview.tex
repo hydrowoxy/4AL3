@@ -4,8 +4,16 @@
 \section{Overview}
 
 This project focuses on segmenting adult gliomas from MRI scans using a 2D
-U-Net convolutional neural network. Manual tumor segmentation requires trained raters to delineate tumor regions
-throughout a 3D MRI volume and is time-consuming. An automated model
+U-Net convolutional neural network. The BraTS 2021 dataset provides four
+co-registered MRI sequences for each subject: T1, T1CE, T2, and T2-FLAIR,
+together with an expert-annotated 3D tumor segmentation mask. Our model will
+operate on 2D axial slices extracted from these volumes. For each slice, the
+corresponding images from all four MRI sequences are stacked as input channels,
+and the model predicts which image regions correspond to background or to one
+of the tumor sub-regions defined by BraTS.
+
+Manual tumor segmentation requires trained raters to delineate tumor regions
+throughout a 3D MRI volume and is therefore time-consuming. An automated model
 can generate an initial segmentation that can be reviewed and corrected by an
 expert, reducing the amount of manual delineation required. Automated
 segmentation is also useful for quantitative research because a fixed model
