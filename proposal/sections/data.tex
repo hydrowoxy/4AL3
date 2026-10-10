@@ -12,3 +12,77 @@
 %% Expected size of the dataset (number of data points) and 3 example data points with labels.
 %% Your dataset should have at least 1k data points. Some projects will have more or less data.
 
+
+
+\section{Data Source(s) and Plan for Data Collection}
+\subsection{Primary Data Source, Access, and Licensing}
+The primary data source is the \textbf{BraTS 2023 Adult Glioma (GLI) dataset}, distributed through Synapse (Project ID \href{https://www.synapse.org/\#!Synapse:syn51156910}{syn51156910}) and originally described by the RSNA-ASNR-MICCAI BraTS Challenge \cite{baid2021brats,menze2015brats,bakas2017sdata}. This dataset reuses the same adult glioma cohort as the earlier BraTS 2020/2021 challenges, but relabels the enhancing tumor class from 4 to 3, so no post-hoc label remapping is required on our end. Each subject provides four co-registered MRI volumes (T1, T1CE, T2, T2-FLAIR) and an expert-annotated 3D ground-truth mask. We use 2D axial slices from these volumes as input to a 2D U-Net, which predicts a 2D tumor sub-region segmentation mask per slice.
+\subsubsection{Access points}
+\begin{itemize}
+    \item \textbf{Synapse (primary, challenge portal):} \url{https://www.synapse.org/#!Synapse:syn51156910}. Requires registration and acceptance of the BraTS data usage agreement.
+    \item \textbf{TCIA (archival mirror of the same cohort):} DOI \url{https://doi.org/10.7937/jc8x-9874}, hosting the processed NIfTI volumes under a CC-BY 4.0 license. Related TCGA glioma collections are described in \cite{bakas2017tcgagbm,bakas2017tcgalgg}.
+
+    \item \textbf{Kaggle} (convenient for download, but secondary): \href{https://www.kaggle.com/datasets/luumsk/asnr-miccai-brats-2023-gli-challenge-training-data}{dataset page} \cite{kagglebrats2023}.
+    Related uploads such as nagisa0v0/brats2023-gli-training-data are available.
+\end{itemize}
+\subsubsection{Terms of Use}
+No web scraping is performed. Data is obtained through the authenticated Synapse clients or the Kaggle mirror, all of which are static bulk downloads with no API rate limiting to manage. The data is licensed for non-commercial research use with attribution (CC-BY 4.0 via TCIA). All data was de-identified by the organizers prior to release, and we will not attempt to re-identify subjects. We will include the required acknowledgement referencing the BraTS organizers and Synapse
+project, with citations provided in the shared bibliography.
+\subsection{Collection, Annotation and Pre-processing}
+
+    \subsubsection{Acquisition:}Retrospective, routine clinical pre-operative multiparametric MRI (mpMRI) of adult gliomas (WHO grades II--IV), contributed by multiple institutions with varying scanners, field strengths (1.5T/3T), and protocols. This heterogeneity is intentional and tests model generalization across acquisition conditions.
+
+    \paragraph{Modalities:}native T1, post-contrast T1-weighted (T1CE/T1Gd), T2-weighted, and T2-FLAIR per subject.
+
+    \subsubsection{Annotation protocol:}
+    
+    Labels were produced by manual delineation by 1 - 4 trained raters following the standardized BraTS protocol, then reviewed and approved by experienced neuroradiologists. \textbf{We do not annotate any data ourselves}. Manual voxel-level delineation of a 3D glioma volume is a labor-intensive expert task, which is why we use this pre-annotated benchmark rather than labeling by hand. The released labels are:
+
+    \begin{center}
+    \begin{tabular}{|l|c|r|}
+    \hline
+    \textbf{Label} & \textbf{Region} & \textbf{Abbrev.} \\
+      \hline
+    0 & Background / non-tumor & --- \\
+    \hline
+    1 & Necrotic and non-enhancing tumor core & NCR/NET \\
+    \hline
+    2 & Peritumoral edema / invaded tissue & ED \\
+    \hline
+    3 & GD-enhancing tumor & ET \\
+    \hline
+    \end{tabular}
+\end{center}
+(Note: In BraTS 2023 dataset the enhancing-tumor label is 3 rather than the historical value 4, so no remapping is required.) Standard evaluation regions remain Whole Tumor $=\{1,2,3\}$, Tumor Core $=\{1,3\}$, Enhancing Tumor $=\{3\}$.
+
+\subsubsection{Pre-processing}
+\paragraph{Preprocessing applied by the organizers:} DICOM to NIfTI conversion (with PHI removed), rigid co-registration of the four modalities, registration to the SRI24 anatomical template, resampling to 1\,mm$^3$ isotropic resolution, and skull-stripping. Volumes are $240\times240\times155$ voxels stored as \texttt{.nii.gz}.
+
+\paragraph{Preprocessing performed by us:} Intensities have no universal scale in MRI, so we will apply per-volume, per-modality z-score normalization computed over non-zero (brain) voxels only, optionally with percentile clipping. We will then stack the four modalities as channels, extract axial 2D slices, and apply training-time augmentation (flips, small rotations, elastic deformation, intensity shifts) identically across channels and mask.
+
+\subsection{Available Metadata}
+Each case is identified by a subject ID (e.g., \texttt{BraTS-GLI-00000-000}). A subset of cases includes a crosswalk to the original TCIA/TCGA identifiers and MGMT promoter methylation status (used in the separate radiogenomic task). Metadata is not used as a model input. In this project, the model input is the four imaging modalities only.
+
+\subsection{Dataset Size, Splits and Use}
+% TCIA's overall BraTS package lists approximately 1480 subjects which is the full cohort size, including test-phase cases that were never released with public labels. Of these, \textbf{1251 subjects have public training labels} and \textbf{219 are released as validation cases with hidden labels} (usable only for official leaderboard submission, not local evaluation). The following figures refer specifically to the 1251 labeled training subjects, since only these support local train/validation/test splitting.
+\begin{itemize}
+    \item \textbf{3D volumes:} 1251 publicly labeled training subjects. Each contributes four modality volumes and one mask. A further 219 validation cases are released with hidden labels and cannot be used for local evaluation, so all train/validation/test splits are drawn from the 1251 labeled subjects.
+    \item \textbf{2D slices:} Each subject has 155 axial slices, giving roughly 194,000 slices in total. After discarding empty (all-zero) slices and subsampling slices without tumor, we expect on the order of tens of thousands of multi-channel training slices. The exact count will be computed after download. This far exceeds the 1000-data-point minimum.
+    \item \textbf{Entire dataset vs subset:} We plan to use the entire labeled cohort. Tumor voxels form a small minority of each volume, so every tumor-containing slice is valuable. Inter-subject and inter-scanner variability also improves generalization. If memory or compute limits arise during prototyping, a random subject-level subset (30--50\%) may be used temporarily, with final models trained on the full set.
+    \item \textbf{Splitting:} The train/validation/test split ($\approx$70/15/15) is performed strictly by subject to avoid leakage between adjacent slices of the same patient.
+\end{itemize}
+
+\subsection{Example Data Points}
+Each data point for the 2-D U-Net is a 4-channel $240 \times 240$ (or cropped/resized) axial slice together with its corresponding integer label map.
+
+\begin{enumerate}
+    \item \textbf{Subject BraTS-GLI-00003-000, axial slice z = 103}
+    Input: stacked [T1, T1CE, T2, FLAIR].
+    Label map: a solid necrotic/non-enhancing core (Label1) at the center, surrounded by a thin ring of enhancing tumor (Label3), with a much larger region of peritumoral edema (Label2) extending outward into the surrounding brain tissue.
+
+    \item \textbf{Subject BraTS-GLI-00019-000, axial slice z = 65} Input: stacked [T1, T1CE, T2, FLAIR].
+    Label map: a small necrotic core (Label1) sits inside a larger enhancing tumor region (Label3), which itself is embedded within a much larger zone of peritumoral edema (Label2) that spreads further into the surrounding brain tissue. The core is proportionally smaller relative to the enhancing and edema regions.
+
+    \item \textbf{BraTS-GLI-00838-000, axial slice z = 81} Input: stacked [T1, T1CE, T2, FLAIR].
+    Label map: Two separate tumor nodules present on the same slice, each with its own small necrotic core (Label1) wrapped by a thin enhancing rim (Label3), both sitting within one large shared region of edema (Label2) representing multifocal/multiple tumor foci within one edema region.
+\end{enumerate}
